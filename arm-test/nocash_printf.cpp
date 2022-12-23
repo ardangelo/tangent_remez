@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "console.hpp"
+#include "nocash_printf.hpp"
 
 static void nocash_puts(char const* str)
 {
