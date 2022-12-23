@@ -5,16 +5,17 @@
 tan_approx:
 	@ if (x < 0x2000) {
 	cmp     r0, #8192
-	@	Store sign bit in the unused part of link register
-	@	lr |= 0x1000'0000
-	orrcs   lr, lr, #268435456
 	@	x = 0x10000 - x
 	rsbcs   r0, r0, #65536
+	@	Store sign bit in top bit of stack pointer
+	@	Stack pointer is word-aligned, so at least lower bit is unset
+	@	sp = (1 << 31) | (sp >> 1);
+	rrx     sp, sp
 	@ }
 
 	@ Save a load by adding array offset to program counter
 	@ ldr     r3, =tan_lut
-	add     r3, pc, #68
+	add     r3, pc, #64
 
 	@ data = &tan_lut[x / 0x100]
 	@ coefficients in form {0x0aaa'bbbb, 0x0bbc'cccc}
@@ -51,16 +52,12 @@ tan_approx:
 	@ r0 = ((((0x0aaa * x) + 0x00b'bbbbb) * x) >> 18) + 0x000c'cccc
 	add     r0, r2, r0, lsr #12
 
-	@ Get sign bit back out of link register
-	@ if (lr >> 28) {
-	lsrs    r3, lr, #28
+	@ Get sign bit back out of stack pointer
+	@ if (sp & (1 << 31); sp <<= 1) {
+	lsls    sp, sp, #1
 	@	r0 = -r0
-	rsbne   r0, r0, #0
+	rsbcs   r0, r0, #0
 	@ }
-
-	@ Restore link register
-	@ lr &= 0x0fff'ffff
-	bic     lr, lr, #-268435456
 
 	bx      lr
 
