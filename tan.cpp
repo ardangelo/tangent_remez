@@ -26,15 +26,10 @@ int main(int argc, char** argv)
 		};
 
 		run_test(x);
-#if 0
 		if (0 < x) {
 			run_test(0x10000 - x);
 		}
-#endif
 	}
-
-	fprintf(stderr, "passed\n");
-	return 0;
 
 	rc::check("tangent approximation",
 		[]() {
