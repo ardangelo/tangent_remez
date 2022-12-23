@@ -14,7 +14,7 @@ tan_approx:
 
 	@ Save a load by adding array offset to program counter
 	@ ldr     r3, =tan_lut
-	add     r3, pc, #72
+	add     r3, pc, #68
 
 	@ data = &tan_lut[x / 0x100]
 	@ coefficients in form {0x0aaa'bbbb, 0x0bbc'cccc}
@@ -46,12 +46,10 @@ tan_approx:
 	mul     r0, r2, r0
 	@ r2 = (((0x0aaa * x) + 0x00bbbbbb) * x) >> 18
 	lsr     r2, r0, #18
-	@ r0 = 0x00bc'cccc
-	bic     r0, r1, #-16777216
-	@ r0 = 0x000c'cccc
-	bic     r0, r0, #15728640
+	@ r0 = 0xcccc'c000
+	lsl     r0, r1, #12
 	@ r0 = ((((0x0aaa * x) + 0x00b'bbbbb) * x) >> 18) + 0x000c'cccc
-	add     r0, r0, r2
+	add     r0, r2, r0, lsr #12
 
 	@ Get sign bit back out of link register
 	@ if (lr >> 28) {
