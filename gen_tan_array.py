@@ -8,7 +8,7 @@ print(f"static constexpr uint32_t fp = {tan_fp};")
 print(f"static constexpr uint32_t divs = {tan_divs};")
 print(f"static constexpr uint32_t width = {tan_width};")
 
-print("// uint32_t data[] = {0xaabbbbbc, 0xccccdddd};")
+print("// uint32_t data[] = {0x0aaabbbb, 0x0bbccccc};")
 print(f"uint32_t data[{2 * tan_divs}] =")
 
 first = True
@@ -20,8 +20,8 @@ for (a, b, c) in tan_values:
 	if c > 0xfffff:
 		raise Exception(f"Overflow on c = {hex(c)}")
 
-	d0 = (a << 20) | (b >> 4)
-	d1 = ((b & 0xf) << 20) | c
+	d0 = (a << 16) | (b >> 8)
+	d1 = ((b & 0xff) << 20) | c
 
 	print(f"// a = {hex(a)}, b = {hex(b)}, c = {hex(c)}")
 	delim = "{" if first else ","
