@@ -45,7 +45,7 @@ tan_approx:
 	add     r2, r2, r1, asr #20
 	@ r0 = ((0x0aaa * x) + 0x00bbbbbb) * x
 	mul     r0, r2, r0
-	@ r0 = 0xcccc'c000
+	@ r1 = 0xcccc'c000
 	lsl     r1, r1, #12
 
 	@ r2 = (((0x0aaa * x) + 0x00bbbbbb) * x) >> 18
@@ -96,10 +96,3 @@ tan_lut:
 	.word 0x3e4af44, 0x933734e
 	.word 0x445b709, 0xd73a019
 	.word 0x4b4bf92, 0xb53ceed
-
-.section .iwram, "ax", %progbits
-.align 2
-.arm
-.global tan_empty
-tan_empty:
-	bx lr
