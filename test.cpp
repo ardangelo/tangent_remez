@@ -4,7 +4,7 @@
 
 #include <rapidcheck.h>
 
-#include "tan_approx.hpp"
+#include "trig_approx.hpp"
 
 static auto test_tan_angle(uint32_t x)
 {

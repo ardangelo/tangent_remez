@@ -51,24 +51,20 @@ rapidcheck.a: $(RAPIDCHECK_OBJS)
 	ar rcs rapidcheck.a $(RAPIDCHECK_OBJS)
 
 # Generate polynomial coefficients
-tan_values_gen.py: gen_tan_values.py lolremez/install/bin/lolremez
-	python3 gen_tan_values.py > tan_values_gen.py
-cos_values_gen.py: gen_cos_values.py lolremez/install/bin/lolremez
-	python3 gen_cos_values.py > cos_values_gen.py
+values_gen.py: gen_values.py lolremez/install/bin/lolremez
+	python3 gen_values.py > values_gen.py
 
 # Pack polynomial coefficients as word array
-tan_array.gen.hpp: tan_values_gen.py gen_tan_array.py
-	python3 gen_tan_array.py > tan_array.gen.hpp
-cos_array.gen.hpp: cos_values_gen.py gen_cos_array.py
-	python3 gen_cos_array.py > cos_array.gen.hpp
+trig_array.gen.hpp: values_gen.py gen_array.py
+	python3 gen_array.py > trig_array.gen.hpp
 
-# Tangent approximation object with coefficients
-tan_approx.o: tan_approx.cpp tan_approx.hpp tan_array.gen.hpp cos_array.gen.hpp
+# Tangent and 1/cosine approximation object with coefficients
+trig_approx.o: trig_approx.cpp trig_approx.hpp trig_array.gen.hpp
 		$(CXX) $(CXXFLAGS) $(RAPIDCHECK_CFLAGS) -c $< -o $@
 
 # Link test binary
-test: test.cpp tan_approx.o rapidcheck.a
-	$(CXX) $(CXXFLAGS) $(RAPIDCHECK_CFLAGS) test.cpp rapidcheck.a tan_approx.o -o test
+test: test.cpp trig_approx.o rapidcheck.a
+	$(CXX) $(CXXFLAGS) $(RAPIDCHECK_CFLAGS) test.cpp rapidcheck.a trig_approx.o -o test
 
 # ARM test binary
 $(GBA_ROMNAME).gba : arm-test/arm-test.cpp arm-test/nocash_printf.hpp \
