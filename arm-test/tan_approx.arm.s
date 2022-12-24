@@ -24,12 +24,12 @@ tan_approx:
 	@ r3 = 0x0aaa'bbbb
 	ldr     r3, [r3, r2, lsl #3]
 
-	@ r2 = 0xbbbb'0000
-	lsl     r2, r3, #16
-
 	@ x %= 0x100
 	@ Calculate ((((a * x) + b) * x) >> 18) + c
 	and     r0, r0, #255
+
+	@ r2 = 0xbbbb'0000
+	lsl     r2, r3, #16
 
 	@ r3 = 0x0aaa
 	lsr     r3, r3, #16
@@ -37,20 +37,23 @@ tan_approx:
 	lsr     r2, r2, #8
 	@ r2 = (0x0aaa * x) + 0x00bbbb00
 	mla     r2, r3, r0, r2
-
 	@ r1 = 0x0bbc'cccc
 	ldr     r1, [r1, #4]
+	@ three cycle stall from mla (covers ldr)
+
 	@ r2 = (0x0aaa * x) + 0x00bbbb00 + 0x0bb
 	@    = (0x0aaa * x) + 0x00bbbbbb
 	add     r2, r2, r1, asr #20
 	@ r0 = ((0x0aaa * x) + 0x00bbbbbb) * x
 	mul     r0, r2, r0
+	@ r0 = 0xcccc'c000
+	lsl     r1, r1, #12
+	@ one cycle stall from mul (covers lsl)
+
 	@ r2 = (((0x0aaa * x) + 0x00bbbbbb) * x) >> 18
 	lsr     r2, r0, #18
-	@ r0 = 0xcccc'c000
-	lsl     r0, r1, #12
 	@ r0 = ((((0x0aaa * x) + 0x00b'bbbbb) * x) >> 18) + 0x000c'cccc
-	add     r0, r2, r0, lsr #12
+	add     r0, r2, r1, lsr #12
 
 	@ Get sign bit back out of stack pointer
 	@ if (sp & (1 << 31); sp <<= 1) {
