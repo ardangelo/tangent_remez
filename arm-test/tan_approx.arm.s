@@ -15,31 +15,33 @@ tan_approx:
 
 	@ Save a load by adding array offset to program counter
 	@ ldr     r3, =tan_lut
-	add     r3, pc, #64
+	add     r3, pc, #72
 
 	@ data = &tan_lut[x / 0x100]
 	@ coefficients in form {0x0aaa'bbbb, 0x0bbc'cccc}
 	lsr     r2, r0, #8
-	add     r1, r3, r2, lsl #3
 	@ r3 = 0x0aaa'bbbb
-	ldr     r3, [r3, r2, lsl #3]
+	ldr     r1, [r3, r2, lsl #3]
 
 	@ x %= 0x100
 	@ Calculate ((((a * x) + b) * x) >> 18) + c
-	and     r0, r0, #255
+	@and     r0, r0, #255
 
 	@ r2 = 0xbbbb'0000
-	lsl     r2, r3, #16
+	lsl     r2, r1, #16
 
 	@ r3 = 0x0aaa
-	lsr     r3, r3, #16
-	@ r2 = 0x00bbbb00
-	lsr     r2, r2, #8
+	lsr     r3, r1, #16
 	@ r2 = (0x0aaa * x) + 0x00bbbb00
-	mla     r2, r3, r0, r2
+	and     r1, r0, #255
+	mul     r3, r3, r1
+	add     r2, r3, r2, lsr #8
+
 	@ r1 = 0x0bbc'cccc
-	ldr     r1, [r1, #4]
-	@ three cycle stall from mla (covers ldr)
+	lsr     r1, r0, #8
+	add     r3, pc, #40
+	ldr     r1, [r3, r1, lsl #3]
+	and     r0, r0, #255
 
 	@ r2 = (0x0aaa * x) + 0x00bbbb00 + 0x0bb
 	@    = (0x0aaa * x) + 0x00bbbbbb
@@ -48,7 +50,6 @@ tan_approx:
 	mul     r0, r2, r0
 	@ r0 = 0xcccc'c000
 	lsl     r1, r1, #12
-	@ one cycle stall from mul (covers lsl)
 
 	@ r2 = (((0x0aaa * x) + 0x00bbbbbb) * x) >> 18
 	lsr     r2, r0, #18
