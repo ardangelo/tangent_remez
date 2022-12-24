@@ -21,6 +21,6 @@
 * 16 ALU operations
 * 1 multiply and 1 multiply-accumulate operation
 * 2 load operations
-* Completes within 33 cycles including return
+* Completes in 30 cycles including return (on system with 1 cycle word read)
 
 [ARMv4 source including table](arm-test/tan_approx.arm.s)

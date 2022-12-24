@@ -54,11 +54,9 @@ tan_approx:
 	add     r0, r2, r1, lsr #12
 
 	@ Get sign bit back out of stack pointer
-	@ if (sp & (1 << 31); sp <<= 1) {
+	@ r0 = (sp & (1 << 31)) ? -r0 : r0; sp <<= 1
 	lsls    sp, sp, #1
-	@	r0 = -r0
 	rsbcs   r0, r0, #0
-	@ }
 
 	bx      lr
 
