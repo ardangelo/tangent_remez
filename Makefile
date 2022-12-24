@@ -68,12 +68,12 @@ test: test.cpp trig_approx.o rapidcheck.a
 
 # ARM test binary
 $(GBA_ROMNAME).gba : arm-test/arm-test.cpp arm-test/nocash_printf.hpp \
-	arm-test/nocash_printf.cpp arm-test/tan_approx.arm.s
+	arm-test/nocash_printf.cpp arm-test/trig_approx.arm.s
 
 	$(GBA_CC) $(CXXFLAGS) $(GBA_CXXFLAGS) $(GBA_RARCH) -c arm-test/nocash_printf.cpp -o nocash_printf.gba.o
 	$(GBA_CC) $(CXXFLAGS) $(GBA_CXXFLAGS) $(GBA_IARCH) -c arm-test/arm-test.cpp -o arm-test.gba.o
-	$(GBA_CC) $(CXXFLAGS) $(GBA_CXXFLAGS) $(GBA_IARCH) -c arm-test/tan_approx.arm.s -o tan_approx.gba.o
-	$(GBA_CC) arm-test.gba.o nocash_printf.gba.o tan_approx.gba.o $(GBA_LDFLAGS) -o $(GBA_ROMNAME).elf
+	$(GBA_CC) $(CXXFLAGS) $(GBA_CXXFLAGS) $(GBA_IARCH) -c arm-test/trig_approx.arm.s -o trig_approx.gba.o
+	$(GBA_CC) arm-test.gba.o nocash_printf.gba.o trig_approx.gba.o $(GBA_LDFLAGS) -o $(GBA_ROMNAME).elf
 	arm-none-eabi-objcopy -v -O binary $(GBA_ROMNAME).elf $(GBA_ROMNAME).gba
 	gbafix $(GBA_ROMNAME).gba -t$(GBA_ROMNAME)
 
