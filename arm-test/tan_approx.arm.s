@@ -15,17 +15,16 @@ tan_approx:
 
 	@ Save a load by adding array offset to program counter
 	@ ldr     r3, =tan_lut
-	add     r3, pc, #72
+	add     r3, pc, #80
 
 	@ data = &tan_lut[x / 0x100]
 	@ coefficients in form {0x0aaa'bbbb, 0x0bbc'cccc}
 	lsr     r2, r0, #8
-	@ r3 = 0x0aaa'bbbb
-	ldr     r1, [r3, r2, lsl #3]
+	@ r1 = 0x0aaa'bbbb
+	add     r3, r2, lsl #3
+	ldr     r1, [r3]
 
-	@ x %= 0x100
 	@ Calculate ((((a * x) + b) * x) >> 18) + c
-	@and     r0, r0, #255
 
 	@ r2 = 0xbbbb'0000
 	lsl     r2, r1, #16
@@ -39,8 +38,11 @@ tan_approx:
 
 	@ r1 = 0x0bbc'cccc
 	lsr     r1, r0, #8
-	add     r3, pc, #40
-	ldr     r1, [r3, r1, lsl #3]
+	add     r3, pc, #44
+	add     r3, r1, lsl #3
+	ldr     r1, [r3]
+
+	@ x %= 0x100
 	and     r0, r0, #255
 
 	@ r2 = (0x0aaa * x) + 0x00bbbb00 + 0x0bb
@@ -48,7 +50,7 @@ tan_approx:
 	add     r2, r2, r1, asr #20
 	@ r0 = ((0x0aaa * x) + 0x00bbbbbb) * x
 	mul     r0, r2, r0
-	@ r0 = 0xcccc'c000
+	@ r1 = 0xcccc'c000
 	lsl     r1, r1, #12
 
 	@ r2 = (((0x0aaa * x) + 0x00bbbbbb) * x) >> 18
@@ -99,3 +101,10 @@ tan_lut:
 	.word 0x3e4af44, 0x933734e
 	.word 0x445b709, 0xd73a019
 	.word 0x4b4bf92, 0xb53ceed
+
+.section .iwram, "ax", %progbits
+.align 2
+.arm
+.global tan_empty
+tan_empty:
+	bx lr
