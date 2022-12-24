@@ -11,4 +11,6 @@ extern "C" {
 // Accurate within 2 bits at Q18
 int32_t tan_approx(uint32_t x);
 
+int32_t icos_approx(uint32_t x);
+
 } // extern "C"

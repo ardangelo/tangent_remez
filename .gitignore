@@ -6,7 +6,7 @@ __pycache__
 
 *.gen.hpp
 *_gen.py
-tan
+test
 *.gba
 *.elf
 *.map

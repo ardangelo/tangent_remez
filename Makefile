@@ -53,13 +53,17 @@ rapidcheck.a: $(RAPIDCHECK_OBJS)
 # Generate polynomial coefficients
 tan_values_gen.py: gen_tan_values.py lolremez/install/bin/lolremez
 	python3 gen_tan_values.py > tan_values_gen.py
+cos_values_gen.py: gen_cos_values.py lolremez/install/bin/lolremez
+	python3 gen_cos_values.py > cos_values_gen.py
 
 # Pack polynomial coefficients as word array
 tan_array.gen.hpp: tan_values_gen.py gen_tan_array.py
 	python3 gen_tan_array.py > tan_array.gen.hpp
+cos_array.gen.hpp: cos_values_gen.py gen_cos_array.py
+	python3 gen_cos_array.py > cos_array.gen.hpp
 
 # Tangent approximation object with coefficients
-tan_approx.o: tan_approx.cpp tan_approx.hpp tan_array.gen.hpp
+tan_approx.o: tan_approx.cpp tan_approx.hpp tan_array.gen.hpp cos_array.gen.hpp
 		$(CXX) $(CXXFLAGS) $(RAPIDCHECK_CFLAGS) -c $< -o $@
 
 # Link test binary
