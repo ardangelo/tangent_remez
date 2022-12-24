@@ -8,7 +8,7 @@
 #include "nocash_printf.hpp"
 
 extern "C" {
-void tan_empty();
+void tan_empty(uint32_t x);
 }
 
 static void set_bg_color(uint32_t rgb15)
@@ -58,10 +58,10 @@ int main(int argc, char** argv)
 
 	nocash_printf("Resetting counter %%zeroclks%%");
 	for (int32_t x = 0x0; x < 0x2000; x++) {
-		tan_empty();
+		tan_empty(x);
 	}
 	for (int32_t x = 0xe0001; x < 0x10000; x++) {
-		tan_empty();
+		tan_empty(x);
 	}
 	nocash_printf("Total harness cycles %%lastclks%%");
 	nocash_printf("Resetting counter %%zeroclks%%");
