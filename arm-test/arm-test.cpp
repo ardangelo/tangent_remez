@@ -10,6 +10,7 @@
 extern "C" {
 	int32_t tan_approx(uint32_t x);
 	int32_t sec_approx(uint32_t x);
+	int32_t cordic_atan2(int32_t y, int32_t x);
 } // extern "C"
 
 static void set_bg_color(uint32_t rgb15)
@@ -68,6 +69,21 @@ int main(int argc, char** argv)
 
 	set_bg_color(0x03e0);
 	nocash_printf("Passed all angles in range (0xe000, 0xffff], [0x0000, 0x2000)");
+
+	nocash_printf("Running CORDIC atan2 test, will take a while...");
+	for (int32_t x = 0x100; x < 0x1000; x += 0x101) {
+		for (int32_t y = 0x10000; y < 0x100000; y += 0x101) {
+			auto actual = int32_t(round(atan2(y, x) / (2 * M_PI) * 0x10000));
+			auto approx = cordic_atan2(x, y);
+			if (abs(actual - approx) > 128) {
+				set_bg_color(0x001f);
+				nocash_printf("Failed atan2(%d / %d): actual %d appr %d",
+					y, x, actual, approx);
+				nocash_break(true);
+			}
+		}
+	}
+
 	nocash_break(true);
 
 	return 0;

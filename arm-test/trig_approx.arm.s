@@ -142,3 +142,71 @@ trig_lut:
 	.word 0x4397275, 0xaf54856
 	.word 0x4977ae6, 0x2956602
 	.word 0x5028412, 0xdd585e2
+
+.section .iwram, "ax", %progbits
+.align 2
+.arm
+.global cordic_atan2
+cordic_atan2:
+	mov     r3, r0
+	mov     r0, #8192
+	cmp     r1, #0
+	rsblt   r0, r0, #0
+	sublt   r2, r3, r1
+	addge   r2, r1, r3
+	addlt   r3, r1, r3
+	subge   r3, r1, r3
+	cmp     r3, #0
+	sublt   r0, r0, #4800
+	addge   r0, r0, #4800
+	sublt   r1, r2, r3, asr #1
+	addge   r1, r2, r3, asr #1
+	addlt   r3, r3, r2, asr #1
+	subge   r3, r3, r2, asr #1
+	sublt   r0, r0, #36
+	addge   r0, r0, #36
+	cmp     r3, #0
+	sublt   r0, r0, #2544
+	addge   r0, r0, #2544
+	sublt   r2, r1, r3, asr #2
+	addge   r2, r1, r3, asr #2
+	addlt   r3, r3, r1, asr #2
+	subge   r3, r3, r1, asr #2
+	sublt   r0, r0, #11
+	addge   r0, r0, #11
+	cmp     r3, #0
+	sublt   r0, r0, #1296
+	addge   r0, r0, #1296
+	sublt   r1, r2, r3, asr #3
+	addge   r1, r2, r3, asr #3
+	addlt   r3, r3, r2, asr #3
+	subge   r3, r3, r2, asr #3
+	sublt   r0, r0, #1
+	addge   r0, r0, #1
+	cmp     r3, #0
+	sublt   r0, r0, #648
+	addge   r0, r0, #648
+	sublt   r2, r1, r3, asr #4
+	addge   r2, r1, r3, asr #4
+	addlt   r3, r3, r1, asr #4
+	subge   r3, r3, r1, asr #4
+	sublt   r0, r0, #3
+	addge   r0, r0, #3
+	cmp     r3, #0
+	sublt   r0, r0, #324
+	addge   r0, r0, #324
+	sublt   r1, r2, r3, asr #5
+	addge   r1, r2, r3, asr #5
+	addlt   r3, r3, r2, asr #5
+	subge   r3, r3, r2, asr #5
+	sublt   r0, r0, #2
+	addge   r0, r0, #2
+	cmp     r3, #0
+	addlt   r3, r3, r1, asr #6
+	subge   r3, r3, r1, asr #6
+	sublt   r0, r0, #163
+	addge   r0, r0, #163
+	cmp     r3, #0
+	sublt   r0, r0, #81
+	addge   r0, r0, #81
+	bx      lr
