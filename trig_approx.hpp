@@ -17,7 +17,7 @@ inline int32_t tan_approx(uint32_t x)
 	return sign * _trig_approx(x);
 }
 
-inline int32_t icos_approx(uint32_t x)
+inline int32_t sec_approx(uint32_t x)
 {
 	return _trig_approx(x + 0x2000);
 }

@@ -74,7 +74,7 @@ tan_values = find_values(
 		math.tan(to_float(lo)),
 	lambda lo, base:
 		f"{1 << coeff_fp} * (tan((x + {lo}) / {0x10000} * 2 * pi) - {base})")
-icos_values = find_values(
+sec_values = find_values(
 	lambda lo:
 		1.0 / math.cos(to_float(lo)),
 	lambda lo, base:
@@ -120,7 +120,7 @@ def find_max_err(values, actual_func):
 
 tan_max_err = find_max_err(tan_values,
 	lambda xr: math.tan(xr))
-icos_max_err = find_max_err(icos_values,
+sec_max_err = find_max_err(sec_values,
 	lambda xr: 1.0 / math.cos(xr))
 
 print(f"fp = {coeff_fp}")
@@ -134,8 +134,8 @@ if tan_max_err[0] <= 3:
 else:
 	print(f"Tangent maximum error {tan_max_err[0]} at {hex(tan_max_err[1])} exceeds 2 bits")
 
-if icos_max_err[0] <= 3:
-	print(f"icos_values = {icos_values}")
+if sec_max_err[0] <= 3:
+	print(f"sec_values = {sec_values}")
 
 else:
-	print(f"1/cosine error {icos_max_err[0]} at {hex(icos_max_err[1])} exceeds 2 bits")
+	print(f"1/cosine error {sec_max_err[0]} at {hex(sec_max_err[1])} exceeds 2 bits")

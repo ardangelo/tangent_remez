@@ -1,12 +1,12 @@
 .section .iwram, "ax", %progbits
 .align 2
 .arm
-.global icos_approx
-icos_approx:
+.global sec_approx
+sec_approx:
 	@ Symmetric
 	cmp     r0, #32768
 	rsbcs   r0, r0, #65536
-	@ 1/cos values 0x2000 after tan values
+	@ secant values 0x2000 after tangent values
 	add     r0, r0, #8192
 	@ Fall through to tan_approx
 
@@ -75,7 +75,7 @@ tan_approx:
 .global trig_lut
 trig_lut:
 
-	@ tan lut
+	@ tangent lut
 	.word 0x86485, 0x500000
 	.word 0x176494, 0x8401923
 	.word 0x2764c3, 0x170324e
@@ -109,7 +109,7 @@ trig_lut:
 	.word 0x445b709, 0xd73a019
 	.word 0x4b4bf92, 0xb53ceee
 
-	@ icos lut
+	@ secant lut
 	.word 0x13c0000, 0x40000
 	.word 0x13d0277, 0xb84004f
 	.word 0x13f04f1, 0x6a4013c
