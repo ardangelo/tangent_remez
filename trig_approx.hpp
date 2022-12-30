@@ -21,3 +21,5 @@ inline int32_t sec_approx(uint32_t x)
 {
 	return _trig_approx(x + 0x2000);
 }
+
+int32_t cordic_atan2(int32_t y, int32_t x);

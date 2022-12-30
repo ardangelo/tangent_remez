@@ -30,6 +30,14 @@ static auto test_sec_angle(uint32_t x)
 	return abs(calculated - approximated) <= 2;
 }
 
+static auto test_cordic_atan2(int32_t y, int32_t x)
+{
+	auto calculated = int32_t(round(atan2(y, x) / (2 * M_PI) * 0x10000));
+	auto approximated = cordic_atan2(y, x);
+	fprintf(stderr, "%d %d\n", calculated, approximated);
+	return abs(calculated - approximated) <= 128;
+}
+
 int main(int argc, char** argv)
 {
 	// Test all angles in range [0, pi/4)
@@ -61,6 +69,16 @@ int main(int argc, char** argv)
 		if (0 < x) {
 			RC_ASSERT(test_tan_angle(0x10000 - x));
 		}
+	});
+
+		// Example test with rapidcheck
+	rc::check("cordic atan2", []() {
+
+		// Generate arbitrary coordinates
+		auto x = *rc::gen::arbitrary<int16_t>() * (1 << 16);
+		auto y = *rc::gen::arbitrary<int16_t>() * (1 << 16);
+
+		RC_ASSERT(test_cordic_atan2(y, x));
 	});
 
 	return 0;

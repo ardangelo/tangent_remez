@@ -24,3 +24,38 @@ int32_t _trig_approx(uint32_t x)
 
 	return t0;
 }
+
+int32_t cordic_atan2(int32_t y, int32_t x)
+{
+	int32_t z = 0;
+	auto iter = [&](uint8_t hi, uint8_t lo, uint32_t i) {
+		auto x0 = x;
+		if (y < 0) {
+			x = x - (y >> i);
+			y = y + (x0 >> i);
+			z = z - (hi << 8);
+			z = z - lo;
+		} else {
+			x = x + (y >> i);
+			y = y - (x0 >> i);
+			z = z + (hi << 8);
+			z = z + lo;
+		}
+	};
+
+	iter(0x20, 0x00, 0);
+	iter(0x12, 0xe4, 1);
+	iter(0x09, 0xfb, 2);
+	iter(0x05, 0x11, 3);
+	iter(0x02, 0x8b, 4);
+	iter(0x01, 0x46, 5);
+	iter(0x00, 0xa3, 6);
+	iter(0x00, 0x51, 7);
+
+	/* more iterations
+	iter(0x00, 0x29, 8);
+	iter(0x00, 0x14, 9);
+	*/
+
+	return z;
+}
