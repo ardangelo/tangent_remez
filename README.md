@@ -1,6 +1,6 @@
 # Fast tangent and secant approximation
 
-* Range `(-π/4, π/4)` expressed as binary angle measurement `(0xe000, 0xffff] U [0x0000, 0x2000)`
+* Input range `(-π/4, π/4)` expressed as binary angle measurement `(0xe000, 0xffff] U [0x0000, 0x2000)`
 * 512 byte lookup table (256b each for tangent and secant)
 * Q18 Fixed-point result accurate within 2 bits
 
@@ -16,7 +16,14 @@
 * Pack coefficients into 8 bytes per division
 * Output C++ header with array and constants
 
-## Branchless ARMv4 implementation
+# Full-range arctan2 using CORDIC
+
+* Output angle expressed as binary angle measurement `[0x0, 0xffff]`
+* 10 iterations of CORDIC vectoring mode to find angle
+* Angle accurate to within 5 bits (`32 / 0x10000` approx. `0.0031 rad`)
+* Hypotenuse not used, but can be calculated by dividing result `x` by gain $\prod_{i=0}^{9} \sqrt{1 + 2^{-2 \cdot i}} \approx 1.64676$
+
+# Branchless ARMv4 implementation
 
 Tangent
 
@@ -29,5 +36,12 @@ Secant
 
 * Same polynomial evaluation core as tangent
 * 3 cycles to adjust input followed by tangent core, 33 cycles
+
+Arctangent
+
+* 89 cycles including return, all ALU
+	- 12 cycles for input adjustment to range `(-π/4, π/4)`
+	- 75 cycles for 10 CORDIC iterations
+	- 2 cycles for negative angle adjustment
 
 [ARMv4 source including table](arm-test/trig_approx.arm.s)

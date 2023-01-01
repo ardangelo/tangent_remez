@@ -163,11 +163,12 @@ cordic_atan2:
 	@	(x, y) = (y, -x)
 	movmi r3, r1
 	rsbmi r1, r0, #0
-	@	angle = 0
+	@	angle = pi/2
 	movmi r0, #0x4000
 	@ } else {
-	@	(x, y) = (x, y) }
+	@	(x, y) = (x, y)
 	movpl r3, r0
+	@	angle = 0 }
 	movpl r0, #0
 
 	@ if (x < 0) {
