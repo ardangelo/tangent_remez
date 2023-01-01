@@ -148,14 +148,81 @@ trig_lut:
 .arm
 .global cordic_atan2
 cordic_atan2:
-	mov     r3, r0
-	mov     r0, #8192
+
+@ Adjust angle to range (-pi/4, pi/4)
+@ Input: r0 x, r1 y
+@ Output: r0 angle, r1 y, r3 x
+
+	@ abs(x) < abs(y) iff (x + y < 0) != (x - y < 0)
+	@ r2 = (x + y > 0) ^ (x - y > 0)
+	add r2, r0, r1
+	sub r3, r0, r1
+	eor r2, r2, r3
+
+	@ shift (x < 0) : (absx < absy) into r3
+	cmn     r0, r0
+	rrx     r3, r2
+	lsr     r3, r3, #30
+	cmp     r3, #2
+	beq     _adj_3pi4_5pi4
+	cmp     r3, #0
+	beq     _adj_npi4_pi4
+
+	@ shift (y < 0) : (absx < absy) into r3
+	cmn     r1, r1
+	rrx     r3, r2
+	lsr     r3, r3, #30
+	cmp     r3, #1
+	beq     _adj_pi4_3pi4
+	@ Fall through
+	@ cmp     r3, #3
+	@ beq     _adj_5pi4_7pi4
+
+_adj_5pi4_7pi4:
+	@ (x, y) = (-y, x)
+	rsb r3, r1, #0
+	mov r1, r0
+
+	@ angle = 3pi/2
+	mov r0, #0xc000
+	b _cordic_atan2_core
+
+_adj_pi4_3pi4:
+	@ (x, y) = (y, -x)
+	mov r3, r1
+	rsb r1, r0, #0
+
+	@ angle = pi/2
+	mov r0, #0x4000
+	b _cordic_atan2_core
+
+_adj_3pi4_5pi4:
+	@ (x, y) = (-x, -y)
+	rsb r3, r0, #0
+	rsb r1, r1, #0
+
+	@ angle = pi
+	mov r0, #0x8000
+	b _cordic_atan2_core
+
+_adj_npi4_pi4:
+	@ (x, y) = (x, y)
+	mov r3, r0
+
+	@ angle = 0
+	mov r0, #0
+	@ Fall through
+	@ b _cordic_atan2_core
+
+_cordic_atan2_core:
 	cmp     r1, #0
-	rsblt   r0, r0, #0
+	sublt   r0, r0, #0x2000
+	addgt   r0, r0, #0x2000
 	sublt   r2, r3, r1
 	addge   r2, r1, r3
 	addlt   r3, r1, r3
 	subge   r3, r1, r3
+
 	cmp     r3, #0
 	sublt   r0, r0, #4800
 	addge   r0, r0, #4800
@@ -165,6 +232,7 @@ cordic_atan2:
 	subge   r3, r3, r2, asr #1
 	sublt   r0, r0, #36
 	addge   r0, r0, #36
+
 	cmp     r3, #0
 	sublt   r0, r0, #2544
 	addge   r0, r0, #2544
@@ -174,6 +242,7 @@ cordic_atan2:
 	subge   r3, r3, r1, asr #2
 	sublt   r0, r0, #11
 	addge   r0, r0, #11
+
 	cmp     r3, #0
 	sublt   r0, r0, #1296
 	addge   r0, r0, #1296
@@ -183,6 +252,7 @@ cordic_atan2:
 	subge   r3, r3, r2, asr #3
 	sublt   r0, r0, #1
 	addge   r0, r0, #1
+
 	cmp     r3, #0
 	sublt   r0, r0, #648
 	addge   r0, r0, #648
@@ -192,6 +262,7 @@ cordic_atan2:
 	subge   r3, r3, r1, asr #4
 	sublt   r0, r0, #3
 	addge   r0, r0, #3
+
 	cmp     r3, #0
 	sublt   r0, r0, #324
 	addge   r0, r0, #324
@@ -201,12 +272,32 @@ cordic_atan2:
 	subge   r3, r3, r2, asr #5
 	sublt   r0, r0, #2
 	addge   r0, r0, #2
+
 	cmp     r3, #0
 	addlt   r3, r3, r1, asr #6
 	subge   r3, r3, r1, asr #6
 	sublt   r0, r0, #163
 	addge   r0, r0, #163
+
 	cmp     r3, #0
+	sublt   r2, r1, r3, asr #7
+	addge   r2, r1, r3, asr #7
+	addlt   r3, r3, r1, asr #7
+	subge   r3, r3, r1, asr #7
 	sublt   r0, r0, #81
 	addge   r0, r0, #81
+
+	cmp     r3, #0
+	addlt   r3, r3, r2, asr #8
+	subge   r3, r3, r2, asr #8
+	sublt   r0, r0, #41
+	addge   r0, r0, #41
+
+	cmp     r3, #0
+	sublt   r0, r0, #20
+	addge   r0, r0, #20
+
+	cmp     r0, #0
+	addlt   r0, #0x10000
+
 	bx      lr

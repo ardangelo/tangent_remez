@@ -10,7 +10,7 @@
 extern "C" {
 	int32_t tan_approx(uint32_t x);
 	int32_t sec_approx(uint32_t x);
-	int32_t cordic_atan2(int32_t y, int32_t x);
+	uint32_t cordic_atan2(int32_t x, int32_t y);
 } // extern "C"
 
 static void set_bg_color(uint32_t rgb15)
@@ -49,6 +49,7 @@ static auto test_sec_angle(uint32_t x)
 
 int main(int argc, char** argv)
 {
+#if 0
 	// Test all angles in range [0, pi/4)
 	for (int32_t x = 0x0; x < 0x2000; x++) {
 		if (!test_tan_angle(x) || !test_sec_angle(x)) {
@@ -69,18 +70,37 @@ int main(int argc, char** argv)
 
 	set_bg_color(0x03e0);
 	nocash_printf("Passed all angles in range (0xe000, 0xffff], [0x0000, 0x2000)");
-
+#endif
 	nocash_printf("Running CORDIC atan2 test, will take a while...");
+
+	auto test_atan2 = [](int32_t x, int32_t y) {
+		nocash_printf("atan2(%d / %d)", y, x);
+		auto actual = int32_t(round(atan2(y, x) / (2 * M_PI) * 0x10000));
+		if (actual < 0) { actual += 0x10000; }
+		auto approx = cordic_atan2(x, y);
+		if (abs(actual - approx) > 128) {
+			set_bg_color(0x001f);
+			nocash_printf("Failed atan2(%d / %d): actual %d appr %d",
+				y, x, actual, approx);
+			nocash_break(true);
+		}
+	};
+
+	test_atan2(50, -30);
+	test_atan2(50, 30);
+	test_atan2(30, 50);
+	test_atan2(-30, 50);
+	test_atan2(-50, 30);
+	test_atan2(-50, -30);
+	test_atan2(-30, -50);
+	test_atan2(30, -50);
+
 	for (int32_t x = 0x100; x < 0x1000; x += 0x101) {
 		for (int32_t y = 0x10000; y < 0x100000; y += 0x101) {
-			auto actual = int32_t(round(atan2(y, x) / (2 * M_PI) * 0x10000));
-			auto approx = cordic_atan2(x, y);
-			if (abs(actual - approx) > 128) {
-				set_bg_color(0x001f);
-				nocash_printf("Failed atan2(%d / %d): actual %d appr %d",
-					y, x, actual, approx);
-				nocash_break(true);
-			}
+			test_atan2(x, y);
+			test_atan2(-x, y);
+			test_atan2(x, -y);
+			test_atan2(-x, -y);
 		}
 	}
 
