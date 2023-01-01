@@ -157,62 +157,26 @@ cordic_atan2:
 	@ r2 = (x + y > 0) ^ (x - y > 0)
 	add r2, r0, r1
 	sub r3, r0, r1
-	eor r2, r2, r3
+	eors r2, r2, r3
 
-	@ shift (x < 0) : (absx < absy) into r3
-	cmn     r0, r0
-	rrx     r3, r2
-	lsr     r3, r3, #30
-	cmp     r3, #2
-	beq     _adj_3pi4_5pi4
-	cmp     r3, #0
-	beq     _adj_npi4_pi4
+	@ if (abs(x) < abs(y)) {
+	@	(x, y) = (y, -x)
+	movmi r3, r1
+	rsbmi r1, r0, #0
+	@	angle = 0
+	movmi r0, #0x4000
+	@ } else {
+	@	(x, y) = (x, y) }
+	movpl r3, r0
+	movpl r0, #0
 
-	@ shift (y < 0) : (absx < absy) into r3
-	cmn     r1, r1
-	rrx     r3, r2
-	lsr     r3, r3, #30
-	cmp     r3, #1
-	beq     _adj_pi4_3pi4
-	@ Fall through
-	@ cmp     r3, #3
-	@ beq     _adj_5pi4_7pi4
-
-_adj_5pi4_7pi4:
-	@ (x, y) = (-y, x)
-	rsb r3, r1, #0
-	mov r1, r0
-
-	@ angle = 3pi/2
-	mov r0, #0xc000
-	b _cordic_atan2_core
-
-_adj_pi4_3pi4:
-	@ (x, y) = (y, -x)
-	mov r3, r1
-	rsb r1, r0, #0
-
-	@ angle = pi/2
-	mov r0, #0x4000
-	b _cordic_atan2_core
-
-_adj_3pi4_5pi4:
-	@ (x, y) = (-x, -y)
-	rsb r3, r0, #0
-	rsb r1, r1, #0
-
-	@ angle = pi
-	mov r0, #0x8000
-	b _cordic_atan2_core
-
-_adj_npi4_pi4:
-	@ (x, y) = (x, y)
-	mov r3, r0
-
-	@ angle = 0
-	mov r0, #0
-	@ Fall through
-	@ b _cordic_atan2_core
+	@ if (x < 0) {
+	cmp r3, #0
+	@	(x, y) = (-x, -y)
+	rsblt r3, r3, #0
+	rsblt r1, r1, #0
+	@	angle += pi }
+	addlt r0, #0x8000
 
 _cordic_atan2_core:
 	cmp     r1, #0

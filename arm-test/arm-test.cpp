@@ -74,11 +74,10 @@ int main(int argc, char** argv)
 	nocash_printf("Running CORDIC atan2 test, will take a while...");
 
 	auto test_atan2 = [](int32_t x, int32_t y) {
-		nocash_printf("atan2(%d / %d)", y, x);
 		auto actual = int32_t(round(atan2(y, x) / (2 * M_PI) * 0x10000));
 		if (actual < 0) { actual += 0x10000; }
 		auto approx = cordic_atan2(x, y);
-		if (abs(actual - approx) > 128) {
+		if (abs(actual - approx) > 32) {
 			set_bg_color(0x001f);
 			nocash_printf("Failed atan2(%d / %d): actual %d appr %d",
 				y, x, actual, approx);
