@@ -146,8 +146,8 @@ trig_lut:
 .section .iwram, "ax", %progbits
 .align 2
 .arm
-.global cordic_atan2
-cordic_atan2:
+.global _cordic_atan2
+_cordic_atan2:
 
 @ Adjust angle to range (-pi/4, pi/4)
 @ Input: r0 x, r1 y

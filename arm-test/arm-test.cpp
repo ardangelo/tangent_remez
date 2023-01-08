@@ -7,11 +7,7 @@
 
 #include "nocash_printf.hpp"
 
-extern "C" {
-	int32_t tan_approx(uint32_t x);
-	int32_t sec_approx(uint32_t x);
-	uint32_t cordic_atan2(int32_t x, int32_t y);
-} // extern "C"
+#include "trig_approx.hpp"
 
 static void set_bg_color(uint32_t rgb15)
 {
@@ -47,9 +43,37 @@ static auto test_sec_angle(uint32_t x)
 	return abs(calculated - approximated) <= 2;
 }
 
+static auto test_atan2(int32_t x, int32_t y)
+{
+	auto [angle, gained_hyp] = cordic_atan2_hyp(x, y);
+	auto hyp = adj_cordic_hyp(gained_hyp);
+
+	auto actual_angle = int32_t(round(atan2(y, x) / (2 * M_PI) * 0x10000));
+	if (actual_angle < 0) { actual_angle += 0x10000; }
+	auto fpsq = [](int32_t x) {
+		auto xf = float(x) / (1 << 16);
+		return xf * xf;
+	};
+	auto ahf = sqrt(fpsq(x) + fpsq(y)) * (1 << 16);
+	auto actual_hyp = int32_t(round(ahf));
+
+	if (abs(actual_angle - angle) > 32) {
+		set_bg_color(0x001f);
+		nocash_printf("Failed atan2(%d / %d) angle: actual %d appr %d",
+			y, x, actual_angle, angle);
+		nocash_break(true);
+	}
+
+	if (float(abs(actual_hyp - hyp)) / actual_hyp > 0.01) {
+		set_bg_color(0x001f);
+		nocash_printf("Failed atan2(%d / %d) hyp: actual %d appr %d",
+			y, x, actual_hyp, hyp);
+		nocash_break(true);
+	}
+};
+
 int main(int argc, char** argv)
 {
-#if 0
 	// Test all angles in range [0, pi/4)
 	for (int32_t x = 0x0; x < 0x2000; x++) {
 		if (!test_tan_angle(x) || !test_sec_angle(x)) {
@@ -68,23 +92,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	set_bg_color(0x03e0);
-	nocash_printf("Passed all angles in range (0xe000, 0xffff], [0x0000, 0x2000)");
-#endif
-	nocash_printf("Running CORDIC atan2 test, will take a while...");
-
-	auto test_atan2 = [](int32_t x, int32_t y) {
-		auto actual = int32_t(round(atan2(y, x) / (2 * M_PI) * 0x10000));
-		if (actual < 0) { actual += 0x10000; }
-		auto approx = cordic_atan2(x, y);
-		if (abs(actual - approx) > 32) {
-			set_bg_color(0x001f);
-			nocash_printf("Failed atan2(%d / %d): actual %d appr %d",
-				y, x, actual, approx);
-			nocash_break(true);
-		}
-	};
-
+	// Basic atan2 tests
 	test_atan2(50, -30);
 	test_atan2(50, 30);
 	test_atan2(30, 50);
@@ -93,6 +101,11 @@ int main(int argc, char** argv)
 	test_atan2(-50, -30);
 	test_atan2(-30, -50);
 	test_atan2(30, -50);
+
+	set_bg_color(0x03e0);
+	nocash_printf("Passed all angles in range (0xe000, 0xffff], [0x0000, 0x2000)");
+
+	nocash_printf("Running CORDIC atan2 test, will take a while...");
 
 	for (int32_t x = 0x100; x < 0x1000; x += 0x101) {
 		for (int32_t y = 0x10000; y < 0x100000; y += 0x101) {

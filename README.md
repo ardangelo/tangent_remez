@@ -21,7 +21,8 @@
 * Output angle expressed as binary angle measurement `[0x0, 0xffff]`
 * 10 iterations of CORDIC vectoring mode to find angle
 * Angle accurate to within 5 bits (`32 / 0x10000` approx. `0.0031 rad`)
-* Hypotenuse not used, but can be calculated by dividing result `x` by gain $\prod_{i=0}^{9} \sqrt{1 + 2^{-2 \cdot i}} \approx 1.64676$
+* Hypotenuse optional
+	- Calculated by dividing result `x` by gain $\prod_{i=0}^{9} \sqrt{1 + 2^{-2 \cdot i}} \approx 1.64676$
 
 # Branchless ARMv4 implementation
 
@@ -43,5 +44,8 @@ Arctangent
 	- 12 cycles for input adjustment to range `(-π/4, π/4)`
 	- 75 cycles for 10 CORDIC iterations
 	- 2 cycles for negative angle adjustment
+
+* 3 cycles for Q8 hypotenuse gain adjustment (if used)
+	- See [header](arm-test/trig_approx.hpp) for hypotenuse use and gain adjustment
 
 [ARMv4 source including table](arm-test/trig_approx.arm.s)
