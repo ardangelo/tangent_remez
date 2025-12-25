@@ -36,7 +36,7 @@ Tangent
 Secant
 
 * Same polynomial evaluation core as tangent
-* 3 cycles to adjust input followed by tangent core, 33 cycles
+* 3 cycles to adjust input followed by tangent core, 31 cycles
 
 Arctangent
 
