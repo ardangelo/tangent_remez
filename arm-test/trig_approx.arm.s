@@ -19,15 +19,11 @@ tan_approx:
 	cmp     r0, #32768
 	@	x = 0x10000 - x
 	rsbcs   r0, r0, #65536
-	@	Store sign bit in top bit of stack pointer
-	@	Stack pointer is word-aligned, so at least lower bit is unset
-	@	sp = (1 << 31) | (sp >> 1);
-	rrx     sp, sp
+	@	Sign bit is conserved as carry bit
 	@ }
 
-	@ Save a load by adding array offset to program counter
-	@ ldr     r3, =trig_lut
-	add     r3, pc, #64
+	@ Get coefficient array address
+	adr     r3, trig_lut
 
 	@ data = &tan_lut[x / 0x100]
 	@ coefficients in form {0x0aaa'bbbb, 0x0bbc'cccc}
@@ -65,9 +61,7 @@ tan_approx:
 	@ r0 = ((((0x0aaa * x) + 0x00b'bbbbb) * x) >> 18) + 0x000c'cccc
 	add     r0, r2, r1, lsr #12
 
-	@ Get sign bit back out of stack pointer
-	@ r0 = (sp & (1 << 31)) ? -r0 : r0; sp <<= 1
-	lsls    sp, sp, #1
+	@ Adjust sign for result
 	rsbcs   r0, r0, #0
 
 	bx      lr

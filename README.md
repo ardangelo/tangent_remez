@@ -28,10 +28,10 @@
 
 Tangent
 
-* 16 ALU operations
+* 14 ALU operations
 * 1 multiply and 1 multiply-accumulate operation
 * 2 load operations
-* Completes in 30 cycles including return (on system with 1 cycle word read)
+* Completes in 28 cycles including return (on system with 1 cycle word read)
 
 Secant
 
